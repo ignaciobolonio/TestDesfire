@@ -1,22 +1,21 @@
 package com.example.ignacio.testdesfire;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.TextView;
-import android.graphics.*;
 import android.widget.Toast;
+import android.widget.Toolbar;
+
 
 import com.nxp.nfclib.CardType;
 import com.nxp.nfclib.KeyType;
@@ -27,16 +26,10 @@ import com.nxp.nfclib.desfire.DESFireFile;
 import com.nxp.nfclib.desfire.EV1ApplicationKeySettings;
 import com.nxp.nfclib.desfire.IDESFireEV1;
 import com.nxp.nfclib.utils.NxpLogUtils;
-import com.nxp.nfclib.utils.Utilities;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.security.Security;
-import java.util.Arrays;
 
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 
@@ -46,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
     private static String m_strPackageKey = "7b25332c391aea103047374396574019";
     public Button write_button;
     public Button read_button;
+    private DrawerLayout mDrawerLayout;
     // The TapLinX library instance
     private NxpNfcLib m_libInstance = null;
 
     private IDESFireEV1 m_objDESFireEV1 = null;
     private CardType m_cardType = CardType.UnknownCard;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         write_button = (Button) findViewById(R.id.write_icon);
         read_button = (Button) findViewById(R.id.read_icon);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
 
         write_button.setOnClickListener(new View.OnClickListener() {
@@ -78,29 +72,25 @@ public class MainActivity extends AppCompatActivity {
                 readMode();
             }
         });
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+
+                        return true;
+                    }
+                });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     /**
      * Initialize the library and register to this activity.
@@ -200,7 +190,6 @@ public class MainActivity extends AppCompatActivity {
 
             EV1ApplicationKeySettings appsettings = appsetbuilder.setAppKeySettingsChangeable(true)
                     .setAppMasterKeyChangeable(true)
-                    .setAuthenticationRequiredForApplicationManagement(false)
                     .setAuthenticationRequiredForDirectoryConfigurationData(false)
                     .setMaxNumberOfApplicationKeys(3)
                     .setKeyTypeOfApplicationKeys(KeyType.AES128).build();
